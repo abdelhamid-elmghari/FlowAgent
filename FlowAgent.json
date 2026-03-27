@@ -1,0 +1,3067 @@
+{
+  "name": "FlowAgent",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "id": "343aca9e-93d1-49fb-92e1-ae3e9d6bb39e",
+      "name": "Telegram Trigger1",
+      "type": "n8n-nodes-base.telegramTrigger",
+      "position": [
+        -7264,
+        -1248
+      ],
+      "webhookId": "dbf7e7d0-4f08-49f4-abf8-e68328e00b24",
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "model": "anthropic/claude-sonnet-4.5",
+        "options": {}
+      },
+      "id": "69e28e77-8c0a-4696-a32f-7b1d7d5c43d9",
+      "name": "OpenRouter Chat Model8",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "position": [
+        -5232,
+        -1216
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "YOUR_INIT_TABLE_ID",
+          "cachedResultUrl": "/projects/YOUR_PROJECT_ID/datatables/YOUR_INIT_TABLE_ID",
+          "cachedResultName": "ClawdBot Init"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "username",
+              "keyValue": "YOUR_USERNAME"
+            }
+          ]
+        },
+        "returnAll": true
+      },
+      "id": "8ebdee28-26df-4495-a422-8df6ce431c03",
+      "name": "Get row(s)5",
+      "type": "n8n-nodes-base.dataTable",
+      "position": [
+        -5632,
+        -1184
+      ],
+      "typeVersion": 1,
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 3,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "loose"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "b1b370a8-b981-43ab-b1b0-88853bad298b",
+              "operator": {
+                "type": "number",
+                "operation": "equals"
+              },
+              "leftValue": "={{ $json.message.chat.id }}",
+              "rightValue": "={{ $if($('Telegram Trigger1').isExecuted, $('Telegram Trigger1').item.json.message.chat.id, YOUR_TELEGRAM_CHAT_ID) }}"
+            }
+          ]
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "id": "c7a3189a-650a-4b8c-8b60-360c3c8ea4c3",
+      "name": "Filter2",
+      "type": "n8n-nodes-base.filter",
+      "position": [
+        -7056,
+        -1248
+      ],
+      "typeVersion": 2.3
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ac8d70f0-59ba-4381-942d-18f7401a4705",
+              "name": "user_message",
+              "type": "string",
+              "value": "={{ $if($('Transcribe a recording1').isExecuted, $('Transcribe a recording1').item.json.content.parts[0].text, $if($('Analyze document1').isExecuted, $('Analyze document1').item.json.content.parts[0].text, $if($('Analyze an image1').isExecuted, $('Analyze an image1').item.json.content.parts[0].text, $('Filter2').item.json.message.text))) }}"
+            },
+            {
+              "id": "4ebb8355-2aa2-4af2-8f82-a8c5bc57e0c9",
+              "name": "system_prompt_details",
+              "type": "string",
+              "value": "=username: {{ $json.username || \"[COLLECT and use database tool to upsert] Field: username | Prompt: Ask the user to choose a username. This will be their unique identifier. | Rules: Save exactly as provided, no modifications. | Example: 'shabbir', 'nova_builder'\" }}\nsoul: {{ $json.soul || \"[COLLECT and use database tool to upsert] Field: soul | Prompt: Ask the user to define your soul - give you a name, a vibe, and a general purpose. | Rules: Combine all three elements (name, vibe, purpose) into a single concise description. | Example: 'Nova - warm and curious - helps brainstorm creative projects'\" }}\nuser: {{ $json.user || \"[COLLECT and use database tool to upsert] Field: user | Prompt: Ask the user to tell you about themselves - anything they want you to remember. | Rules: Consolidate their response into a structured profile. Include interests, goals, preferences, and any relevant context. | Example: 'AI automation consultant, prefers direct communication, focused on scaling content workflows'\" }}"
+            },
+            {
+              "id": "f1d7c2a0-d580-4e7a-bc8b-29e1102c03bb",
+              "name": "last_channel",
+              "type": "string",
+              "value": "=telegram"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "8acdfa8d-8243-4e94-a9f5-137ede5d6eb1",
+      "name": "Edit Fields4",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        -5456,
+        -1584
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "version": 3,
+                  "leftValue": "",
+                  "caseSensitive": true,
+                  "typeValidation": "strict"
+                },
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "id": "39d05258-72cc-4266-86f1-8b2ae9fccd53",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "leftValue": "={{ $if($('Edit Fields4').isExecuted, $('Edit Fields4').item.json.last_channel, $if($('Edit Fields5').isExecuted, $('Edit Fields5').item.json.last_channel, $if($('Edit Fields6').isExecuted, $('Edit Fields6').item.json.last_channel, $('Edit Fields7').item.json.last_channel))) }}",
+                    "rightValue": "telegram"
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "Telegram"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "version": 3,
+                  "leftValue": "",
+                  "caseSensitive": true,
+                  "typeValidation": "strict"
+                },
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "id": "10be5dff-f0cc-496b-aff2-225f66654597",
+                    "operator": {
+                      "name": "filter.operator.equals",
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "leftValue": "={{ $if($('Edit Fields4').isExecuted, $('Edit Fields4').item.json.last_channel, $if($('Edit Fields5').isExecuted, $('Edit Fields5').item.json.last_channel, $if($('Edit Fields6').isExecuted, $('Edit Fields6').item.json.last_channel, $('Edit Fields7').item.json.last_channel))) }}",
+                    "rightValue": "whatsapp"
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "whatsapp"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "b053b8c9-f239-48b5-bcc7-9e7600d5f655",
+      "name": "Switch2",
+      "type": "n8n-nodes-base.switch",
+      "position": [
+        -4000,
+        -1888
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $if($('Telegram Trigger1').isExecuted, $('Telegram Trigger1').item.json.message.chat.id, YOUR_TELEGRAM_CHAT_ID) }}",
+        "text": "={{ $('n8nClaw1').item.json.output }}",
+        "additionalFields": {
+          "parse_mode": "Markdown"
+        }
+      },
+      "id": "daefd537-5517-483f-b772-e42257223b06",
+      "name": "Send a text message1",
+      "type": "n8n-nodes-base.telegram",
+      "position": [
+        -3712,
+        -2080
+      ],
+      "webhookId": "cec319a4-390a-4df4-9ef2-4e80b443e077",
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.user_message }}",
+        "options": {
+          "systemMessage": "=You are n8nClaw, an advanced, proactive AI assistant with access to advanced tools. Your functionality is according to the below details.\n\n{{ $json.system_prompt_details }}\n\nThe User field is a living document. Any new and important information that you receive related to the user - that is worth remembering to be useful in future conversations - is to be added there using the update info tool. Any recurring tasks the user expects you to do (manage calendar, etc - should also go into the user field)\n\nYou also have access to read, create, and update tasks and subtasks through two data tables - one for tasks and one for subtasks.\n\nAnything the user asks you to do must be logged to the tasks and subtasks tables. You can then work on those tasks and subtasks, and update them with lots of detail - as necessary.\n\nTask and subtask details should be upserted with any info required. For example, if you completed a task/subtask partially, update the details with whatever you've already done so you can pick up from there in the next iteration.\n\nAdditionally, As you work on a task/subtask, it may require additional tasks/subtasks to be created - do so if needed, adding all relevant details.\n\nOnce a task or subtask is done, mark task_completed or subtask_completed as true. An entire task can only be completed once ALL subtasks are complete.\n\nYou should always search for tasks first, and then search for the subtasks by the task ID, and plan your work accordingly.\n\nIf you require more context about the user or about previous conversations, you can use query the vector store tool(it is trained on past conversations) to pull the relevant information and continue working.\n\nEMAIL\nYou have access to an AI agent tool that manages your gmail inbox. You can use it to read, reply, delete, get, and search for messages. To take any actions on existing messages, you will need to use the google api-friendly message ID (if you received an email directly).\n\nDOING WORK\nYou have access to a research agent to get any information on anything.\n\nYou also have access to multiple worker agents to break tasks up into parts and do more work concurrently. You MUST use these agents.\n\nYou also have access to a document agent for saving work. The document agent is ONLY to receive completed work for saving. You are NOT to send it instructions for what output to produce. this agent has access to google docs create, update, and drive tools. Save the Google Drive URLs to the task info for persistence.\n\n"
+        }
+      },
+      "id": "47289e05-a984-4fc8-80ce-d29376548378",
+      "name": "n8nClaw1",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        -4304,
+        -1488
+      ],
+      "typeVersion": 3
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Get pending or completed tasks",
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "YOUR_TASKS_TABLE_ID",
+          "cachedResultUrl": "/projects/YOUR_PROJECT_ID/datatables/YOUR_TASKS_TABLE_ID",
+          "cachedResultName": "ClawdBot Tasks"
+        },
+        "returnAll": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Return_All', ``, 'boolean') }}"
+      },
+      "id": "f50ca875-0cf8-4774-ad82-228b6ea2387f",
+      "name": "Get Tasks1",
+      "type": "n8n-nodes-base.dataTableTool",
+      "position": [
+        -3376,
+        -1504
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Get pending or completed subtasks",
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "YOUR_SUBTASKS_TABLE_ID",
+          "cachedResultUrl": "/projects/YOUR_PROJECT_ID/datatables/YOUR_SUBTASKS_TABLE_ID",
+          "cachedResultName": "ClawdBot Subtasks"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "parent_task_id",
+              "keyValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('conditions0_Value', ``, 'string') }}"
+            }
+          ]
+        },
+        "returnAll": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Return_All', ``, 'boolean') }}"
+      },
+      "id": "979e2a56-f2b8-4dbd-981f-c3144f84f07b",
+      "name": "Get Subtasks1",
+      "type": "n8n-nodes-base.dataTableTool",
+      "position": [
+        -3504,
+        -1504
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Upsert Subtask",
+        "operation": "upsert",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "YOUR_SUBTASKS_TABLE_ID",
+          "cachedResultUrl": "/projects/YOUR_PROJECT_ID/datatables/YOUR_SUBTASKS_TABLE_ID",
+          "cachedResultName": "ClawdBot Subtasks"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "parent_task_id",
+              "keyValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('conditions0_Value', ``, 'string') }}"
+            }
+          ]
+        },
+        "columns": {
+          "value": {
+            "subtask_name": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('subtask_name', ``, 'string') }}",
+            "parent_task_id": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parent_task_id', ``, 'string') }}",
+            "subtask_details": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('subtask_details', ``, 'string') }}",
+            "subtask_complete": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('subtask_complete', ``, 'boolean') }}"
+          },
+          "schema": [
+            {
+              "id": "parent_task_id",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "readOnly": false,
+              "required": false,
+              "displayName": "parent_task_id",
+              "defaultMatch": false
+            },
+            {
+              "id": "subtask_name",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "readOnly": false,
+              "required": false,
+              "displayName": "subtask_name",
+              "defaultMatch": false
+            },
+            {
+              "id": "subtask_details",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "readOnly": false,
+              "required": false,
+              "displayName": "subtask_details",
+              "defaultMatch": false
+            },
+            {
+              "id": "subtask_complete",
+              "type": "boolean",
+              "display": true,
+              "removed": false,
+              "readOnly": false,
+              "required": false,
+              "displayName": "subtask_complete",
+              "defaultMatch": false
+            }
+          ],
+          "mappingMode": "defineBelow",
+          "matchingColumns": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "da3fec27-405a-4ced-a616-97f7673597c3",
+      "name": "Upsert Subtask1",
+      "type": "n8n-nodes-base.dataTableTool",
+      "position": [
+        -3632,
+        -1504
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Upsert task",
+        "operation": "upsert",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "YOUR_TASKS_TABLE_ID",
+          "cachedResultUrl": "/projects/YOUR_PROJECT_ID/datatables/YOUR_TASKS_TABLE_ID",
+          "cachedResultName": "ClawdBot Tasks"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "task_name",
+              "keyValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('conditions0_Value', ``, 'string') }}"
+            }
+          ]
+        },
+        "columns": {
+          "value": {
+            "task_name": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('task_name', ``, 'string') }}",
+            "Is_recurring": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Is_recurring', ``, 'boolean') }}",
+            "task_details": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('task_details', ``, 'string') }}",
+            "task_complete": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('task_complete', ``, 'boolean') }}"
+          },
+          "schema": [
+            {
+              "id": "task_name",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "readOnly": false,
+              "required": false,
+              "displayName": "task_name",
+              "defaultMatch": false
+            },
+            {
+              "id": "task_details",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "readOnly": false,
+              "required": false,
+              "displayName": "task_details",
+              "defaultMatch": false
+            },
+            {
+              "id": "task_complete",
+              "type": "boolean",
+              "display": true,
+              "removed": false,
+              "readOnly": false,
+              "required": false,
+              "displayName": "task_complete",
+              "defaultMatch": false
+            },
+            {
+              "id": "Is_recurring",
+              "type": "boolean",
+              "display": true,
+              "removed": false,
+              "readOnly": false,
+              "required": false,
+              "displayName": "Is_recurring",
+              "defaultMatch": false
+            }
+          ],
+          "mappingMode": "defineBelow",
+          "matchingColumns": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "2c1af680-3f9d-4e08-b89a-afff1504daad",
+      "name": "Upsert Task1",
+      "type": "n8n-nodes-base.dataTableTool",
+      "position": [
+        -3776,
+        -1504
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Initialize first usage",
+        "operation": "upsert",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "YOUR_INIT_TABLE_ID",
+          "cachedResultUrl": "/projects/YOUR_PROJECT_ID/datatables/YOUR_INIT_TABLE_ID",
+          "cachedResultName": "ClawdBot Init"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "username",
+              "keyValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('conditions0_Value', ``, 'string') }}"
+            }
+          ]
+        },
+        "columns": {
+          "value": {
+            "soul": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('soul', ``, 'string') }}",
+            "user": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('user', ``, 'string') }}",
+            "username": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('username', `the \"username\" provided by the user as the first answer.`, 'string') }}",
+            "heartbeat": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('heartbeat', ``, 'string') }}",
+            "last_channel": "={{ $json.last_channel }}"
+          },
+          "schema": [
+            {
+              "id": "username",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "readOnly": false,
+              "required": false,
+              "displayName": "username",
+              "defaultMatch": false
+            },
+            {
+              "id": "soul",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "readOnly": false,
+              "required": false,
+              "displayName": "soul",
+              "defaultMatch": false
+            },
+            {
+              "id": "user",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "readOnly": false,
+              "required": false,
+              "displayName": "user",
+              "defaultMatch": false
+            },
+            {
+              "id": "heartbeat",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "readOnly": false,
+              "required": false,
+              "displayName": "heartbeat",
+              "defaultMatch": false
+            },
+            {
+              "id": "last_channel",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "readOnly": false,
+              "required": false,
+              "displayName": "last_channel",
+              "defaultMatch": false
+            },
+            {
+              "id": "last_vector_id",
+              "type": "number",
+              "display": true,
+              "removed": true,
+              "readOnly": false,
+              "required": false,
+              "displayName": "last_vector_id",
+              "defaultMatch": false
+            }
+          ],
+          "mappingMode": "defineBelow",
+          "matchingColumns": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "c4b11da9-ef6c-4f6b-b3d1-42df33d25a40",
+      "name": "Initialization - Update Info1",
+      "type": "n8n-nodes-base.dataTableTool",
+      "position": [
+        -3248,
+        -1504
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "YOUR_USERNAME",
+        "contextWindowLength": 15
+      },
+      "id": "dae18918-8731-4023-8e0f-ee55d3fe0121",
+      "name": "Postgres Chat Memory1",
+      "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
+      "position": [
+        -5088,
+        -1216
+      ],
+      "typeVersion": 1.3
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT session_id, message, id\nFROM n8n_chat_histories \nWHERE id > '{{ $json.last_vector_id }}'\nORDER BY id ASC\n",
+        "options": {}
+      },
+      "id": "c788170f-fe06-4467-95f0-8703062467e4",
+      "name": "Execute a SQL query1",
+      "type": "n8n-nodes-base.postgres",
+      "position": [
+        -6800,
+        -608
+      ],
+      "typeVersion": 2.6
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "YOUR_INIT_TABLE_ID",
+          "cachedResultUrl": "/projects/YOUR_PROJECT_ID/datatables/YOUR_INIT_TABLE_ID",
+          "cachedResultName": "ClawdBot Init"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "username",
+              "keyValue": "YOUR_USERNAME"
+            }
+          ]
+        }
+      },
+      "id": "fc184a13-4df6-4d48-b2cd-e576bc8ac5c6",
+      "name": "Get row(s)6",
+      "type": "n8n-nodes-base.dataTable",
+      "position": [
+        -6992,
+        -608
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "tableName": {
+          "__rl": true,
+          "mode": "list",
+          "value": "documents",
+          "cachedResultName": "documents"
+        },
+        "options": {
+          "queryName": "match_documents"
+        }
+      },
+      "id": "b8ed1491-fe12-4b4e-80db-dfbb41343c25",
+      "name": "Supabase Vector Store2",
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreSupabase",
+      "position": [
+        -5952,
+        -608
+      ],
+      "typeVersion": 1.3
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "46f06b8f-2faa-4663-9a43-d5b8765ff689",
+      "name": "Embeddings OpenAI2",
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "position": [
+        -5904,
+        -400
+      ],
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "jsonMode": "expressionData",
+        "jsonData": "={{ $json.output.summary }}",
+        "options": {}
+      },
+      "id": "a450f1a5-bbdf-4691-ba92-6244d6a18e05",
+      "name": "Default Data Loader1",
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "position": [
+        -5712,
+        -400
+      ],
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "YOUR_INIT_TABLE_ID",
+          "cachedResultUrl": "/projects/YOUR_PROJECT_ID/datatables/YOUR_INIT_TABLE_ID",
+          "cachedResultName": "ClawdBot Init"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "username",
+              "keyValue": "YOUR_USERNAME"
+            }
+          ]
+        },
+        "columns": {
+          "value": {
+            "last_vector_id": "={{ $('Execute a SQL query1').last().json.id }}"
+          },
+          "schema": [
+            {
+              "id": "username",
+              "type": "string",
+              "display": true,
+              "removed": true,
+              "readOnly": false,
+              "required": false,
+              "displayName": "username",
+              "defaultMatch": false
+            },
+            {
+              "id": "soul",
+              "type": "string",
+              "display": true,
+              "removed": true,
+              "readOnly": false,
+              "required": false,
+              "displayName": "soul",
+              "defaultMatch": false
+            },
+            {
+              "id": "user",
+              "type": "string",
+              "display": true,
+              "removed": true,
+              "readOnly": false,
+              "required": false,
+              "displayName": "user",
+              "defaultMatch": false
+            },
+            {
+              "id": "heartbeat",
+              "type": "string",
+              "display": true,
+              "removed": true,
+              "readOnly": false,
+              "required": false,
+              "displayName": "heartbeat",
+              "defaultMatch": false
+            },
+            {
+              "id": "last_channel",
+              "type": "string",
+              "display": true,
+              "removed": true,
+              "readOnly": false,
+              "required": false,
+              "displayName": "last_channel",
+              "defaultMatch": false
+            },
+            {
+              "id": "last_vector_id",
+              "type": "number",
+              "display": true,
+              "removed": false,
+              "readOnly": false,
+              "required": false,
+              "displayName": "last_vector_id",
+              "defaultMatch": false
+            }
+          ],
+          "mappingMode": "defineBelow",
+          "matchingColumns": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "dfc82168-ca3f-4729-bd90-5d98710dbe07",
+      "name": "Update row(s)1",
+      "type": "n8n-nodes-base.dataTable",
+      "position": [
+        -5584,
+        -608
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "get info about the user as needed",
+        "tableName": {
+          "__rl": true,
+          "mode": "list",
+          "value": "documents",
+          "cachedResultName": "documents"
+        },
+        "options": {}
+      },
+      "id": "72097e88-f1ac-4e27-a64c-b5ca91e4e3f6",
+      "name": "Supabase Vector Store3",
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreSupabase",
+      "position": [
+        -4928,
+        -1216
+      ],
+      "typeVersion": 1.3
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "1b094ba9-ce31-4c87-8570-1a1ed470add0",
+      "name": "Embeddings OpenAI3",
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "position": [
+        -4800,
+        -1056
+      ],
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "YOUR_WEBHOOK_PATH",
+        "options": {}
+      },
+      "id": "34a88e0f-ce27-4e4b-bb8c-910008a5a524",
+      "name": "Webhook1",
+      "type": "n8n-nodes-base.webhook",
+      "position": [
+        -7280,
+        -1792
+      ],
+      "webhookId": "YOUR_WEBHOOK_PATH",
+      "typeVersion": 2.1
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "YOUR_INIT_TABLE_ID",
+          "cachedResultUrl": "/projects/YOUR_PROJECT_ID/datatables/YOUR_INIT_TABLE_ID",
+          "cachedResultName": "ClawdBot Init"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "username",
+              "keyValue": "YOUR_USERNAME"
+            }
+          ]
+        },
+        "returnAll": true
+      },
+      "id": "b7d8d800-b7b1-485d-869c-ec6e9cc8c46b",
+      "name": "Get row(s)7",
+      "type": "n8n-nodes-base.dataTable",
+      "position": [
+        -6864,
+        -1792
+      ],
+      "typeVersion": 1,
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 3,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "loose"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "b1b370a8-b981-43ab-b1b0-88853bad298b",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              },
+              "leftValue": "={{ $json.body.data.key.remoteJid }}",
+              "rightValue": "=YOUR_PHONE@s.whatsapp.net"
+            },
+            {
+              "id": "4f0a49e8-7a0b-4bcf-8c4c-929d0596e309",
+              "operator": {
+                "type": "boolean",
+                "operation": "false",
+                "singleValue": true
+              },
+              "leftValue": "={{ $json.body.data.key.fromMe }}",
+              "rightValue": false
+            }
+          ]
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "id": "7afe4953-08a7-4ae6-8065-e32cca786c3b",
+      "name": "Filter3",
+      "type": "n8n-nodes-base.filter",
+      "position": [
+        -7072,
+        -1792
+      ],
+      "typeVersion": 2.3
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ac8d70f0-59ba-4381-942d-18f7401a4705",
+              "name": "user_message",
+              "type": "string",
+              "value": "={{ $('Filter3').item.json.body.data.message.conversation }}"
+            },
+            {
+              "id": "4ebb8355-2aa2-4af2-8f82-a8c5bc57e0c9",
+              "name": "system_prompt_details",
+              "type": "string",
+              "value": "=username: {{ $json.username || \"[COLLECT and use database tool to upsert] Field: username | Prompt: Ask the user to choose a username. This will be their unique identifier. | Rules: Save exactly as provided, no modifications. | Example: 'shabbir', 'nova_builder'\" }}\nsoul: {{ $json.soul || \"[COLLECT and use database tool to upsert] Field: soul | Prompt: Ask the user to define your soul - give you a name, a vibe, and a general purpose. | Rules: Combine all three elements (name, vibe, purpose) into a single concise description. | Example: 'Nova - warm and curious - helps brainstorm creative projects'\" }}\nuser: {{ $json.user || \"[COLLECT and use database tool to upsert] Field: user | Prompt: Ask the user to tell you about themselves - anything they want you to remember. | Rules: Consolidate their response into a structured profile. Include interests, goals, preferences, and any relevant context. | Example: 'AI automation consultant, prefers direct communication, focused on scaling content workflows'\" }}"
+            },
+            {
+              "id": "f1d7c2a0-d580-4e7a-bc8b-29e1102c03bb",
+              "name": "last_channel",
+              "type": "string",
+              "value": "=whatsapp"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "52dc64c0-41d8-4d67-892b-407b796665cd",
+      "name": "Edit Fields5",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        -5456,
+        -1792
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "remoteJid": "={{ $if($('Filter3').isExecuted, $('Filter3').item.json.body.data.key.remoteJid, 'YOUR_PHONE@s.whatsapp.net') }}",
+        "messageText": "={{ $('n8nClaw1').item.json.output }}",
+        "instanceName": "YOUR_EVOLUTION_INSTANCE",
+        "options_message": {}
+      },
+      "id": "74d02d3b-e6a9-4b4e-8ad4-053be4cd426e",
+      "name": "Enviar texto1",
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "position": [
+        -3712,
+        -1904
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "model": "google/gemini-3-flash-preview",
+        "options": {}
+      },
+      "id": "b038a210-aa6e-42bd-9902-5d2b4584a07e",
+      "name": "OpenRouter Chat Model9",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "position": [
+        -4672,
+        -1008
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "YOUR_USERNAME-research",
+        "contextWindowLength": 10
+      },
+      "id": "2307d0b4-45a7-45e9-96ed-bc702b6a206f",
+      "name": "Simple Memory6",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "position": [
+        -4528,
+        -1008
+      ],
+      "typeVersion": 1.3
+    },
+    {
+      "parameters": {
+        "query": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Query', ``, 'string') }}",
+        "options": {}
+      },
+      "id": "c53ce12c-f30a-4bbe-857a-7618059f1056",
+      "name": "Search in Tavily1",
+      "type": "@tavily/n8n-nodes-tavily.tavilyTool",
+      "position": [
+        -4272,
+        -1008
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {},
+      "id": "78ff02f6-3095-4ae0-bbee-9ca235aef42e",
+      "name": "Wikipedia1",
+      "type": "@n8n/n8n-nodes-langchain.toolWikipedia",
+      "position": [
+        -4400,
+        -1008
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours"
+            }
+          ]
+        }
+      },
+      "id": "3453de08-8c49-40d7-ac3a-9eb4c3be282f",
+      "name": "Hourly heartbeat1",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "position": [
+        -7280,
+        -1968
+      ],
+      "typeVersion": 1.3
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "YOUR_INIT_TABLE_ID",
+          "cachedResultUrl": "/projects/YOUR_PROJECT_ID/datatables/YOUR_INIT_TABLE_ID",
+          "cachedResultName": "ClawdBot Init"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "username",
+              "keyValue": "YOUR_USERNAME"
+            }
+          ]
+        },
+        "returnAll": true
+      },
+      "id": "f50b7eea-9b99-47ac-9fe8-f43eada3bc07",
+      "name": "Get row(s)8",
+      "type": "n8n-nodes-base.dataTable",
+      "position": [
+        -6864,
+        -1968
+      ],
+      "typeVersion": 1,
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ac8d70f0-59ba-4381-942d-18f7401a4705",
+              "name": "user_message",
+              "type": "string",
+              "value": "=See what's pending and start working on it."
+            },
+            {
+              "id": "4ebb8355-2aa2-4af2-8f82-a8c5bc57e0c9",
+              "name": "system_prompt_details",
+              "type": "string",
+              "value": "=username: {{ $json.username || \"[COLLECT and use database tool to upsert] Field: username | Prompt: Ask the user to choose a username. This will be their unique identifier. | Rules: Save exactly as provided, no modifications. | Example: 'shabbir', 'nova_builder'\" }}\nsoul: {{ $json.soul || \"[COLLECT and use database tool to upsert] Field: soul | Prompt: Ask the user to define your soul - give you a name, a vibe, and a general purpose. | Rules: Combine all three elements (name, vibe, purpose) into a single concise description. | Example: 'Nova - warm and curious - helps brainstorm creative projects'\" }}\nuser: {{ $json.user || \"[COLLECT and use database tool to upsert] Field: user | Prompt: Ask the user to tell you about themselves - anything they want you to remember. | Rules: Consolidate their response into a structured profile. Include interests, goals, preferences, and any relevant context. | Example: 'AI automation consultant, prefers direct communication, focused on scaling content workflows'\" }}"
+            },
+            {
+              "id": "f1d7c2a0-d580-4e7a-bc8b-29e1102c03bb",
+              "name": "last_channel",
+              "type": "string",
+              "value": "={{ $json.last_channel }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "53367369-34d1-44e5-b4c4-4fbea8e24e13",
+      "name": "Edit Fields6",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        -5456,
+        -1968
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "toolDescription": "Research Agent",
+        "text": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Prompt__User_Message_', ``, 'string') }}",
+        "options": {
+          "systemMessage": "=You are a research agent. You have access to Wikipedia and Tavily tools."
+        }
+      },
+      "id": "353a0d76-24a6-420c-9982-e719fcfcdec2",
+      "name": "Research Agent1",
+      "type": "@n8n/n8n-nodes-langchain.agentTool",
+      "position": [
+        -4624,
+        -1216
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "simple": false,
+        "filters": {},
+        "options": {}
+      },
+      "id": "80838ee6-99ae-4d2a-9faf-6de5ced4671c",
+      "name": "Gmail Trigger1",
+      "type": "n8n-nodes-base.gmailTrigger",
+      "position": [
+        -7280,
+        -2160
+      ],
+      "typeVersion": 1.3
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "YOUR_INIT_TABLE_ID",
+          "cachedResultUrl": "/projects/YOUR_PROJECT_ID/datatables/YOUR_INIT_TABLE_ID",
+          "cachedResultName": "ClawdBot Init"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "username",
+              "keyValue": "YOUR_USERNAME"
+            }
+          ]
+        },
+        "returnAll": true
+      },
+      "id": "779c465c-882b-40da-8e6d-3859bf82a191",
+      "name": "Get row(s)9",
+      "type": "n8n-nodes-base.dataTable",
+      "position": [
+        -6864,
+        -2160
+      ],
+      "typeVersion": 1,
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ac8d70f0-59ba-4381-942d-18f7401a4705",
+              "name": "user_message",
+              "type": "string",
+              "value": "=You have just received an email. Determine what to do with it.\n\nQuery the databases if it's related to any task, and query the vector store to get more context.\n\nIMPORTANT - you are not to divulge ANY sensitive information in email replies. If a reply requires sensitive information, save the reply as a draft in Gmail and let me know on telegram.\n\n{{ $('Gmail Trigger1').item.json.headers.from }}\n{{ $('Gmail Trigger1').item.json.headers['message-id'] }}\n{{ $('Gmail Trigger1').item.json.headers.subject }}\n{{ $('Gmail Trigger1').item.json.text }}"
+            },
+            {
+              "id": "4ebb8355-2aa2-4af2-8f82-a8c5bc57e0c9",
+              "name": "system_prompt_details",
+              "type": "string",
+              "value": "=username: {{ $json.username || \"[COLLECT and use database tool to upsert] Field: username | Prompt: Ask the user to choose a username. This will be their unique identifier. | Rules: Save exactly as provided, no modifications. | Example: 'shabbir', 'nova_builder'\" }}\nsoul: {{ $json.soul || \"[COLLECT and use database tool to upsert] Field: soul | Prompt: Ask the user to define your soul - give you a name, a vibe, and a general purpose. | Rules: Combine all three elements (name, vibe, purpose) into a single concise description. | Example: 'Nova - warm and curious - helps brainstorm creative projects'\" }}\nuser: {{ $json.user || \"[COLLECT and use database tool to upsert] Field: user | Prompt: Ask the user to tell you about themselves - anything they want you to remember. | Rules: Consolidate their response into a structured profile. Include interests, goals, preferences, and any relevant context. | Example: 'AI automation consultant, prefers direct communication, focused on scaling content workflows'\" }}"
+            },
+            {
+              "id": "f1d7c2a0-d580-4e7a-bc8b-29e1102c03bb",
+              "name": "last_channel",
+              "type": "string",
+              "value": "={{ $json.last_channel }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "043a3723-1e63-44a0-94ce-7ee032d58716",
+      "name": "Edit Fields7",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        -5456,
+        -2160
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "toolDescription": "Email manager agent",
+        "text": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Prompt__User_Message_', ``, 'string') }}",
+        "options": {
+          "systemMessage": "You are an email manager. You have access to a variety of tools to process emails. Keep track of the message ID (google api friendly format) - you'll need it to take any actions on any messages."
+        }
+      },
+      "id": "02e8ee56-f2a7-4bea-aed4-93c1e2717661",
+      "name": "Email Manager1",
+      "type": "@n8n/n8n-nodes-langchain.agentTool",
+      "position": [
+        -4032,
+        -1168
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "model": "anthropic/claude-haiku-4.5",
+        "options": {}
+      },
+      "id": "574c9cc9-00b0-4ce0-927f-6e32d7eea3ce",
+      "name": "OpenRouter Chat Model10",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "position": [
+        -4080,
+        -1008
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "YOUR_USERNAME-email",
+        "contextWindowLength": 10
+      },
+      "id": "d04d167a-43ac-441d-812b-9587e7b1b33b",
+      "name": "Simple Memory7",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "position": [
+        -3904,
+        -896
+      ],
+      "typeVersion": 1.3
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('To', ``, 'string') }}",
+        "subject": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Subject', ``, 'string') }}",
+        "message": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Message', ``, 'string') }}",
+        "options": {}
+      },
+      "id": "f4658747-e427-4c0c-ae98-a746e50e737a",
+      "name": "Send a message in Gmail1",
+      "type": "n8n-nodes-base.gmailTool",
+      "position": [
+        -3664,
+        -688
+      ],
+      "webhookId": "127e5478-a344-4620-9039-cb20f5540e81",
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "toolDescription": "call this tool to create, update, and move documents in google drive",
+        "text": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Prompt__User_Message_', ``, 'string') }}",
+        "options": {
+          "systemMessage": "You are a document manager agent. You have access to create and update google docs, search for folders in google drive, delete files in google drive, and move files between folders. Retain the file ID in memory for any file you are working with."
+        }
+      },
+      "id": "cb659731-9b15-4a17-8360-680df525d456",
+      "name": "Document Manager1",
+      "type": "@n8n/n8n-nodes-langchain.agentTool",
+      "position": [
+        -2960,
+        -880
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "YOUR_USERNAME-docs",
+        "contextWindowLength": 20
+      },
+      "id": "8cfea811-67ac-4b5d-9eb5-61de57f76d52",
+      "name": "Simple Memory8",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "position": [
+        -3168,
+        -688
+      ],
+      "typeVersion": 1.3
+    },
+    {
+      "parameters": {
+        "model": "anthropic/claude-haiku-4.5",
+        "options": {}
+      },
+      "id": "4d2f3a83-61ba-4546-8da9-4bd8c6428c2c",
+      "name": "OpenRouter Chat Model11",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "position": [
+        -3312,
+        -688
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "version": 3,
+                  "leftValue": "",
+                  "caseSensitive": true,
+                  "typeValidation": "strict"
+                },
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "id": "bbe4cbfd-d4b1-4095-b505-d97c90927250",
+                    "operator": {
+                      "type": "object",
+                      "operation": "exists",
+                      "singleValue": true
+                    },
+                    "leftValue": "={{ $json.message.voice }}",
+                    "rightValue": ""
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "Audio message"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "version": 3,
+                  "leftValue": "",
+                  "caseSensitive": true,
+                  "typeValidation": "strict"
+                },
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "id": "59f728d1-4935-475f-b519-39643b57c99f",
+                    "operator": {
+                      "type": "array",
+                      "operation": "exists",
+                      "singleValue": true
+                    },
+                    "leftValue": "={{ $json.message.photo }}",
+                    "rightValue": ""
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "Image"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "version": 3,
+                  "leftValue": "",
+                  "caseSensitive": true,
+                  "typeValidation": "strict"
+                },
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "id": "72c3ed90-193a-4df8-ba1b-a5de99277d87",
+                    "operator": {
+                      "type": "object",
+                      "operation": "exists",
+                      "singleValue": true
+                    },
+                    "leftValue": "={{ $json.message.document }}",
+                    "rightValue": ""
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "Document"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra"
+        }
+      },
+      "id": "07d05e0f-683b-41f6-845e-f9423a988c6a",
+      "name": "Switch3",
+      "type": "n8n-nodes-base.switch",
+      "position": [
+        -6800,
+        -1280
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "resource": "document",
+        "modelId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "models/gemini-2.5-flash",
+          "cachedResultName": "models/gemini-2.5-flash"
+        },
+        "inputType": "binary",
+        "options": {}
+      },
+      "id": "27c2d27a-6130-4e0e-bd28-d0fb7ea79547",
+      "name": "Analyze document1",
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "position": [
+        -6112,
+        -1312
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "fileId": "={{ $json.message.photo[3].file_id }}",
+        "additionalFields": {}
+      },
+      "id": "1809d6eb-4611-4b5f-add2-61365adeca7f",
+      "name": "Get a file3",
+      "type": "n8n-nodes-base.telegram",
+      "position": [
+        -6320,
+        -1472
+      ],
+      "webhookId": "e70c0340-4812-48fc-858c-f5723a3d8b35",
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "fileId": "={{ $json.message.document.file_id }}",
+        "additionalFields": {}
+      },
+      "id": "f2a021d7-fd73-4690-a3ab-6c088b653ac4",
+      "name": "Get a file4",
+      "type": "n8n-nodes-base.telegram",
+      "position": [
+        -6320,
+        -1312
+      ],
+      "webhookId": "d37f31f7-7cf4-403b-a0c2-b882c6376bc1",
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "fileId": "={{ $json.message.voice.file_id }}",
+        "additionalFields": {}
+      },
+      "id": "a7a37ae4-8ee6-430a-991f-0ee2ed1ff26c",
+      "name": "Get a file5",
+      "type": "n8n-nodes-base.telegram",
+      "position": [
+        -6320,
+        -1632
+      ],
+      "webhookId": "d7434e68-52b1-48ff-9c5d-0236438f9892",
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "resource": "audio",
+        "modelId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "models/gemini-2.5-flash",
+          "cachedResultName": "models/gemini-2.5-flash"
+        },
+        "inputType": "binary",
+        "options": {}
+      },
+      "id": "a5f74373-8f91-48ec-a297-80c9f0a8b69b",
+      "name": "Transcribe a recording1",
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "position": [
+        -6112,
+        -1632
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "resource": "image",
+        "operation": "analyze",
+        "modelId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "models/nano-banana-pro-preview",
+          "cachedResultName": "models/nano-banana-pro-preview"
+        },
+        "inputType": "binary",
+        "options": {}
+      },
+      "id": "99a2bd03-5e5a-4b03-a8fe-372e97a9b21b",
+      "name": "Analyze an image1",
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "position": [
+        -6112,
+        -1472
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {}
+          ]
+        }
+      },
+      "id": "9613ada1-53f8-495b-9d9e-868c13c60027",
+      "name": "Data Loader1",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "position": [
+        -7200,
+        -608
+      ],
+      "typeVersion": 1.3
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.message }}",
+        "hasOutputParser": true,
+        "messages": {
+          "messageValues": [
+            {
+              "message": "You are a summarizer agent. I will provide you with the entire log of a day's worth of discussion with my AI agent. You are to summarize the conversation for storing in deep memory."
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "id": "38b9f9a2-a79e-4930-a8b9-6cf92a62d2e8",
+      "name": "Basic LLM Chain1",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "position": [
+        -6352,
+        -608
+      ],
+      "typeVersion": 1.7
+    },
+    {
+      "parameters": {
+        "fieldsToAggregate": {
+          "fieldToAggregate": [
+            {
+              "fieldToAggregate": "message"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "b68be2cb-6cb5-468a-8f99-a6a383e14b78",
+      "name": "Aggregate1",
+      "type": "n8n-nodes-base.aggregate",
+      "position": [
+        -6592,
+        -608
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "model": "anthropic/claude-haiku-4.5",
+        "options": {}
+      },
+      "id": "02ed9de4-d355-4616-a271-ff178c1466c5",
+      "name": "OpenRouter Chat Model12",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "position": [
+        -6416,
+        -400
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n\t\"summary\":\"text\"\n}"
+      },
+      "id": "302fec7e-4e06-44f1-9a9f-fd0ff59f1c15",
+      "name": "Structured Output Parser1",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "position": [
+        -6208,
+        -400
+      ],
+      "typeVersion": 1.3
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Update user, heartbeat as needed.",
+        "operation": "upsert",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "YOUR_INIT_TABLE_ID",
+          "cachedResultUrl": "/projects/YOUR_PROJECT_ID/datatables/YOUR_INIT_TABLE_ID",
+          "cachedResultName": "ClawdBot Init"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "username",
+              "keyValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('conditions0_Value', ``, 'string') }}"
+            }
+          ]
+        },
+        "columns": {
+          "value": {
+            "soul": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('soul', ``, 'string') }}",
+            "user": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('user', ``, 'string') }}",
+            "username": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('username', `the \"username\" provided by the user as the first answer.`, 'string') }}",
+            "heartbeat": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('heartbeat', ``, 'string') }}",
+            "last_channel": "={{ $json.last_channel }}"
+          },
+          "schema": [
+            {
+              "id": "username",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "readOnly": false,
+              "required": false,
+              "displayName": "username",
+              "defaultMatch": false
+            },
+            {
+              "id": "soul",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "readOnly": false,
+              "required": false,
+              "displayName": "soul",
+              "defaultMatch": false
+            },
+            {
+              "id": "user",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "readOnly": false,
+              "required": false,
+              "displayName": "user",
+              "defaultMatch": false
+            },
+            {
+              "id": "heartbeat",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "readOnly": false,
+              "required": false,
+              "displayName": "heartbeat",
+              "defaultMatch": false
+            },
+            {
+              "id": "last_channel",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "readOnly": false,
+              "required": false,
+              "displayName": "last_channel",
+              "defaultMatch": false
+            },
+            {
+              "id": "last_vector_id",
+              "type": "number",
+              "display": true,
+              "removed": true,
+              "readOnly": false,
+              "required": false,
+              "displayName": "last_vector_id",
+              "defaultMatch": false
+            }
+          ],
+          "mappingMode": "defineBelow",
+          "matchingColumns": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "314eff1d-b245-4a73-b7ed-a6bcaadcfc32",
+      "name": "Update User and Heartbeat1",
+      "type": "n8n-nodes-base.dataTableTool",
+      "position": [
+        -3120,
+        -1504
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "messageId": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Message_ID', ``, 'string') }}"
+      },
+      "id": "9283aaf3-e02b-4fec-85d8-3106505acce2",
+      "name": "Delete a message in Gmail1",
+      "type": "n8n-nodes-base.gmailTool",
+      "position": [
+        -3824,
+        -688
+      ],
+      "webhookId": "bbf8b2d1-921d-4a83-9e0c-efde5ea83bc0",
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "messageId": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Message_ID', ``, 'string') }}",
+        "simple": false,
+        "options": {}
+      },
+      "id": "9a01487e-8fed-4cc1-b386-a97d23de66ab",
+      "name": "Get a message in Gmail1",
+      "type": "n8n-nodes-base.gmailTool",
+      "position": [
+        -3984,
+        -688
+      ],
+      "webhookId": "b496028e-2a7d-4a09-a824-5c9aea779a0d",
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "returnAll": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Return_All', ``, 'boolean') }}",
+        "simple": false,
+        "filters": {
+          "q": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Search', ``, 'string') }}",
+          "sender": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Sender', ``, 'string') }}"
+        },
+        "options": {}
+      },
+      "id": "bcf2c6da-f5fb-4b70-bedb-b518eca5c97e",
+      "name": "Get many messages in Gmail1",
+      "type": "n8n-nodes-base.gmailTool",
+      "position": [
+        -3504,
+        -688
+      ],
+      "webhookId": "520fa693-54fa-468e-8f9b-f7ef8539b0fb",
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "operation": "reply",
+        "messageId": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Message_ID', ``, 'string') }}",
+        "message": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Message', ``, 'string') }}",
+        "options": {}
+      },
+      "id": "0d8492c2-f610-4e57-973d-6672d73287ff",
+      "name": "Reply to a message in Gmail1",
+      "type": "n8n-nodes-base.gmailTool",
+      "position": [
+        -4144,
+        -688
+      ],
+      "webhookId": "e58aedc1-67bf-4ff6-861c-a3072b28961c",
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "folderId": "default",
+        "title": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Title', ``, 'string') }}"
+      },
+      "id": "50e0a3e3-b981-40a7-bee7-5d1107b84483",
+      "name": "Create a document in Google Docs1",
+      "type": "n8n-nodes-base.googleDocsTool",
+      "position": [
+        -2608,
+        -576
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "documentURL": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Doc_ID_or_URL', ``, 'string') }}"
+      },
+      "id": "409c2632-a7cb-45e6-93e9-33f50eecf0e0",
+      "name": "Get a document in Google Docs1",
+      "type": "n8n-nodes-base.googleDocsTool",
+      "position": [
+        -2768,
+        -576
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentURL": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Doc_ID_or_URL', ``, 'string') }}",
+        "actionsUi": {
+          "actionFields": [
+            {
+              "action": "insert",
+              "text": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('actionFields0_Text', ``, 'string') }}"
+            }
+          ]
+        }
+      },
+      "id": "ee0da93c-f465-4218-8760-03b26df52a73",
+      "name": "Update a document in Google Docs1",
+      "type": "n8n-nodes-base.googleDocsTool",
+      "position": [
+        -2928,
+        -576
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "operation": "deleteFile",
+        "fileId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('File', ``, 'string') }}"
+        },
+        "options": {}
+      },
+      "id": "3f69b4fb-1090-4497-a0c6-dc8ae06d7189",
+      "name": "Delete a file in Google Drive1",
+      "type": "n8n-nodes-base.googleDriveTool",
+      "position": [
+        -2448,
+        -576
+      ],
+      "typeVersion": 3
+    },
+    {
+      "parameters": {
+        "resource": "folder",
+        "name": "={{ $fromAI(\"folder_name\") }}",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "root",
+          "cachedResultName": "/ (Root folder)"
+        },
+        "options": {}
+      },
+      "id": "3a1d3b1f-cb64-4008-a8e9-ef0457a275e6",
+      "name": "Create folder in Google Drive1",
+      "type": "n8n-nodes-base.googleDriveTool",
+      "position": [
+        -2304,
+        -576
+      ],
+      "typeVersion": 3
+    },
+    {
+      "parameters": {
+        "operation": "move",
+        "fileId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('File', ``, 'string') }}"
+        },
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Parent_Folder', ``, 'string') }}"
+        }
+      },
+      "id": "8fd5ccc8-a0a6-42e6-9671-b08c319c0896",
+      "name": "Move file in Google Drive1",
+      "type": "n8n-nodes-base.googleDriveTool",
+      "position": [
+        -2128,
+        -576
+      ],
+      "typeVersion": 3
+    },
+    {
+      "parameters": {
+        "resource": "fileFolder",
+        "limit": 50,
+        "queryString": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Search_Query', ``, 'string') }}",
+        "returnAll": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Return_All', ``, 'boolean') }}",
+        "filter": {},
+        "options": {}
+      },
+      "id": "6ded6edb-26e8-4a15-a525-005966c7f718",
+      "name": "Search files and folders in Google Drive1",
+      "type": "n8n-nodes-base.googleDriveTool",
+      "position": [
+        -1952,
+        -576
+      ],
+      "typeVersion": 3
+    },
+    {
+      "parameters": {
+        "model": "anthropic/claude-haiku-4.5",
+        "options": {}
+      },
+      "id": "87bbf76a-ca25-4e9d-88d4-dc8bdef5172a",
+      "name": "OpenRouter Chat Model13",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "position": [
+        -3328,
+        -1056
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "toolDescription": "Worker Agent 1 - use this for simple work",
+        "text": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Prompt__User_Message_', ``, 'string') }}",
+        "options": {
+          "systemMessage": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('System_Message', ``, 'string') }}"
+        }
+      },
+      "id": "df65a7c2-8b3d-48a1-ac6a-e38133bf65f5",
+      "name": "Worker Agent ",
+      "type": "@n8n/n8n-nodes-langchain.agentTool",
+      "position": [
+        -3232,
+        -1216
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "YOUR_USERNAME-worker1",
+        "contextWindowLength": 20
+      },
+      "id": "57addd33-da13-444b-885f-e391c40c1c7c",
+      "name": "Simple Memory9",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "position": [
+        -3184,
+        -1056
+      ],
+      "typeVersion": 1.3
+    },
+    {
+      "parameters": {
+        "model": "anthropic/claude-sonnet-4.5",
+        "options": {}
+      },
+      "id": "36e6d16a-3742-42ae-9048-862eee76b925",
+      "name": "OpenRouter Chat Model14",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "position": [
+        -2944,
+        -1056
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "YOUR_USERNAME-worker2",
+        "contextWindowLength": 20
+      },
+      "id": "11158b7f-a0dd-4df1-9514-54cfebfd443a",
+      "name": "Simple Memory10",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "position": [
+        -2800,
+        -1056
+      ],
+      "typeVersion": 1.3
+    },
+    {
+      "parameters": {
+        "model": "anthropic/claude-opus-4.6",
+        "options": {}
+      },
+      "id": "ec74d810-f883-4edc-a4b6-2e7f73cde8ed",
+      "name": "OpenRouter Chat Model15",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "position": [
+        -2576,
+        -1056
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "YOUR_USERNAME-worker3",
+        "contextWindowLength": 20
+      },
+      "id": "4842644f-b1f6-4e18-9f39-42e63eb1dd38",
+      "name": "Simple Memory11",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "position": [
+        -2432,
+        -1056
+      ],
+      "typeVersion": 1.3
+    },
+    {
+      "parameters": {
+        "toolDescription": "Worker Agent 3 - use for higher-order thinking work",
+        "text": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Prompt__User_Message_', ``, 'string') }}",
+        "options": {
+          "systemMessage": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('System_Message', ``, 'string') }}"
+        }
+      },
+      "id": "c9cce293-a1b8-4cad-a82f-5641d8fc419a",
+      "name": "Worker Agent 4",
+      "type": "@n8n/n8n-nodes-langchain.agentTool",
+      "position": [
+        -2480,
+        -1280
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "toolDescription": "Worker Agent 2 - use for mid-level work",
+        "text": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Prompt__User_Message_', ``, 'string') }}",
+        "options": {
+          "systemMessage": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('System_Message', ``, 'string') }}"
+        }
+      },
+      "id": "c0ce4a4f-6579-4308-b761-d40ab539094a",
+      "name": "Worker Agent 5",
+      "type": "@n8n/n8n-nodes-langchain.agentTool",
+      "position": [
+        -2848,
+        -1248
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "content": "## 💾 Long-Term Memory Pipeline\nA scheduled flow that runs periodically to build persistent memory:\n1. **Pull** new chat history from Postgres\n2. **Aggregate** messages into conversation chunks\n3. **Summarize** with Haiku 4.5 (via OpenRouter)\n4. **Embed** summaries with OpenAI embeddings\n5. **Store** in Supabase vector database for future RAG retrieval",
+        "height": 576,
+        "width": 2096
+      },
+      "id": "e742d62c-6317-4c8b-88c8-fa9636ad10bb",
+      "name": "Sticky Note1",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -7472,
+        -800
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## 🔌 Triggers & Input Processing\nFour input channels feed into the agent:\n- **Telegram Trigger** — text, voice, images, documents\n- **WhatsApp Webhook** — text messages via Evolution API\n- **Gmail Trigger** — polls for new emails\n- **Hourly Heartbeat** — autonomous task processing\n\nEach trigger filters messages, fetches the user profile from the **Init data table**, \nand normalizes input into a standard format \n(`user_message`, `system_prompt`, `last_channel`).",
+        "height": 660,
+        "width": 1172,
+        "color": 4
+      },
+      "id": "276de5ec-7723-4a22-8fb2-21c1ec121d7c",
+      "name": "Sticky Note - Triggers1",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -7872,
+        -2240
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## 🧠 Core AI Agent — n8nClaw\nThe central orchestrator. Uses **Claude Sonnet 4.5** (via OpenRouter) with a **15-message Postgres chat memory** window.\n\nReceives normalized input from all channels and decides how to respond — calling tools, delegating to sub-agents, or replying directly.\n\nThe agent's personality and behavior are configured via the **soul** and **user** fields in the Init table.",
+        "height": 500,
+        "width": 680,
+        "color": 6
+      },
+      "id": "9a673ddd-5e63-4c37-997f-39af272df543",
+      "name": "Sticky Note - Core Agent1",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -4704,
+        -1776
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## 🛠️ Tools (Data Tables & Vector Store)\nDirect tools available to the n8nClaw agent:\n- **Get/Upsert Tasks** — task management via n8n data tables\n- **Get/Upsert Subtasks** — subtask tracking linked by parent_task_id\n- **Update User & Heartbeat** — persist user profile and heartbeat state\n- **Supabase Vector Store** — RAG queries against past conversation summaries",
+        "height": 420,
+        "width": 972,
+        "color": 3
+      },
+      "id": "a963d7de-c66e-4c5e-8d37-0e53237eeb10",
+      "name": "Sticky Note - Tools1",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -3888,
+        -1728
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## 🤖 Sub-Agents\nSpecialized agents that the core n8nClaw agent can delegate to:\n\n- **Research Agent** (Gemini 3 Flash) — web research via Tavily + Wikipedia\n- **Email Manager** (Haiku 4.5) — Gmail CRUD (read, reply, send, delete, search)\n- **Document Manager** (Haiku 4.5) — Google Docs/Drive operations\n- **Worker 1** (Haiku 4.5) — simple tasks\n- **Worker 2** (Sonnet 4.5) — mid-level work\n- **Worker 3** (Opus 4.6) — complex reasoning",
+        "height": 264,
+        "width": 588,
+        "color": 2
+      },
+      "id": "98308839-6102-46f8-8bb5-0c92dd860c6b",
+      "name": "Sticky Note - Sub-Agents1",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -2272,
+        -1024
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## 📤 Output Routing\nA **Switch** node routes the agent's response back to the originating channel:\n- **Telegram** — Send text message via Telegram Bot API\n- **WhatsApp** — Send text via Evolution API",
+        "height": 568,
+        "width": 500,
+        "color": 7
+      },
+      "id": "007d1bb8-449e-4b9a-9570-c69095a3da07",
+      "name": "Sticky Note - Output1",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -3872,
+        -2320
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## 🎙️ Media Handling (Telegram)\nVoice, images, and documents sent via Telegram are routed through a **Switch** node and processed by Gemini models:\n- **Voice** → Gemini 2.5 Flash transcription\n- **Images** → Gemini image analysis\n- **Documents** → Gemini 2.5 Flash document analysis\n\nThe processed content is then forwarded to the core agent as text.",
+        "height": 212,
+        "width": 800
+      },
+      "id": "c7839d2d-cf98-4bb9-beb1-61050717ac3c",
+      "name": "Sticky Note - Media1",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -6608,
+        -1088
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "operation": "markAsRead",
+        "messageId": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Message_ID', ``, 'string') }}"
+      },
+      "id": "1c3e2bbf-2392-464a-a261-794ec7642ace",
+      "name": "Mark a message as read in Gmail1",
+      "type": "n8n-nodes-base.gmailTool",
+      "position": [
+        -4304,
+        -688
+      ],
+      "webhookId": "e58aedc1-67bf-4ff6-861c-a3072b28961c",
+      "typeVersion": 2.2
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Telegram Trigger1": {
+      "main": [
+        [
+          {
+            "node": "Filter2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model8": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "n8nClaw1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s)5": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter2": {
+      "main": [
+        [
+          {
+            "node": "Switch3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields4": {
+      "main": [
+        [
+          {
+            "node": "n8nClaw1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch2": {
+      "main": [
+        [
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Enviar texto1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "n8nClaw1": {
+      "main": [
+        [
+          {
+            "node": "Switch2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Tasks1": {
+      "ai_tool": [
+        [
+          {
+            "node": "n8nClaw1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Subtasks1": {
+      "ai_tool": [
+        [
+          {
+            "node": "n8nClaw1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upsert Subtask1": {
+      "ai_tool": [
+        [
+          {
+            "node": "n8nClaw1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upsert Task1": {
+      "ai_tool": [
+        [
+          {
+            "node": "n8nClaw1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Initialization - Update Info1": {
+      "ai_tool": [
+        [
+          {
+            "node": "n8nClaw1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres Chat Memory1": {
+      "ai_memory": [
+        [
+          {
+            "node": "n8nClaw1",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute a SQL query1": {
+      "main": [
+        [
+          {
+            "node": "Aggregate1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s)6": {
+      "main": [
+        [
+          {
+            "node": "Execute a SQL query1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase Vector Store2": {
+      "main": [
+        [
+          {
+            "node": "Update row(s)1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI2": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Supabase Vector Store2",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader1": {
+      "ai_document": [
+        [
+          {
+            "node": "Supabase Vector Store2",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase Vector Store3": {
+      "ai_tool": [
+        [
+          {
+            "node": "n8nClaw1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI3": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Supabase Vector Store3",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook1": {
+      "main": [
+        [
+          {
+            "node": "Filter3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s)7": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter3": {
+      "main": [
+        [
+          {
+            "node": "Get row(s)7",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields5": {
+      "main": [
+        [
+          {
+            "node": "n8nClaw1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model9": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Research Agent1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory6": {
+      "ai_memory": [
+        [
+          {
+            "node": "Research Agent1",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search in Tavily1": {
+      "ai_tool": [
+        [
+          {
+            "node": "Research Agent1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wikipedia1": {
+      "ai_tool": [
+        [
+          {
+            "node": "Research Agent1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Hourly heartbeat1": {
+      "main": [
+        [
+          {
+            "node": "Get row(s)8",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s)8": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields6",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields6": {
+      "main": [
+        [
+          {
+            "node": "n8nClaw1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Research Agent1": {
+      "ai_tool": [
+        [
+          {
+            "node": "n8nClaw1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail Trigger1": {
+      "main": [
+        [
+          {
+            "node": "Get row(s)9",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s)9": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields7",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields7": {
+      "main": [
+        [
+          {
+            "node": "n8nClaw1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Email Manager1": {
+      "ai_tool": [
+        [
+          {
+            "node": "n8nClaw1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model10": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Email Manager1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory7": {
+      "ai_memory": [
+        [
+          {
+            "node": "Email Manager1",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message in Gmail1": {
+      "ai_tool": [
+        [
+          {
+            "node": "Email Manager1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Document Manager1": {
+      "ai_tool": [
+        [
+          {
+            "node": "n8nClaw1",
+            "type": "ai_tool",
+            "index": 0
+          },
+          {
+            "node": "Worker Agent ",
+            "type": "ai_tool",
+            "index": 0
+          },
+          {
+            "node": "Worker Agent 5",
+            "type": "ai_tool",
+            "index": 0
+          },
+          {
+            "node": "Worker Agent 4",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory8": {
+      "ai_memory": [
+        [
+          {
+            "node": "Document Manager1",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model11": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Document Manager1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch3": {
+      "main": [
+        [
+          {
+            "node": "Get a file5",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get a file3",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get a file4",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get row(s)5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analyze document1": {
+      "main": [
+        [
+          {
+            "node": "Get row(s)5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get a file3": {
+      "main": [
+        [
+          {
+            "node": "Analyze an image1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get a file4": {
+      "main": [
+        [
+          {
+            "node": "Analyze document1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get a file5": {
+      "main": [
+        [
+          {
+            "node": "Transcribe a recording1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transcribe a recording1": {
+      "main": [
+        [
+          {
+            "node": "Get row(s)5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analyze an image1": {
+      "main": [
+        [
+          {
+            "node": "Get row(s)5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Data Loader1": {
+      "main": [
+        [
+          {
+            "node": "Get row(s)6",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain1": {
+      "main": [
+        [
+          {
+            "node": "Supabase Vector Store2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate1": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model12": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser1": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Basic LLM Chain1",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update User and Heartbeat1": {
+      "ai_tool": [
+        [
+          {
+            "node": "n8nClaw1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delete a message in Gmail1": {
+      "ai_tool": [
+        [
+          {
+            "node": "Email Manager1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get a message in Gmail1": {
+      "ai_tool": [
+        [
+          {
+            "node": "Email Manager1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many messages in Gmail1": {
+      "ai_tool": [
+        [
+          {
+            "node": "Email Manager1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reply to a message in Gmail1": {
+      "ai_tool": [
+        [
+          {
+            "node": "Email Manager1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a document in Google Docs1": {
+      "ai_tool": [
+        [
+          {
+            "node": "Document Manager1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get a document in Google Docs1": {
+      "ai_tool": [
+        [
+          {
+            "node": "Document Manager1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update a document in Google Docs1": {
+      "ai_tool": [
+        [
+          {
+            "node": "Document Manager1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delete a file in Google Drive1": {
+      "ai_tool": [
+        [
+          {
+            "node": "Document Manager1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create folder in Google Drive1": {
+      "ai_tool": [
+        [
+          {
+            "node": "Document Manager1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Move file in Google Drive1": {
+      "ai_tool": [
+        [
+          {
+            "node": "Document Manager1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search files and folders in Google Drive1": {
+      "ai_tool": [
+        [
+          {
+            "node": "Document Manager1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model13": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Worker Agent ",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Worker Agent ": {
+      "ai_tool": [
+        [
+          {
+            "node": "n8nClaw1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory9": {
+      "ai_memory": [
+        [
+          {
+            "node": "Worker Agent ",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model14": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Worker Agent 5",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory10": {
+      "ai_memory": [
+        [
+          {
+            "node": "Worker Agent 5",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model15": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Worker Agent 4",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory11": {
+      "ai_memory": [
+        [
+          {
+            "node": "Worker Agent 4",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Worker Agent 4": {
+      "ai_tool": [
+        [
+          {
+            "node": "n8nClaw1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Worker Agent 5": {
+      "ai_tool": [
+        [
+          {
+            "node": "n8nClaw1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mark a message as read in Gmail1": {
+      "ai_tool": [
+        [
+          {
+            "node": "Email Manager1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "df3f8f3b-051b-459e-837c-872b2c727080",
+  "meta": {
+    "instanceId": "bc72e15b7013f194d1f63f941f480fd6ff2e9e038b84e1987f1fce463c0c8d68"
+  },
+  "id": "4j77JYxMlBoPkWk1",
+  "tags": []
+}
