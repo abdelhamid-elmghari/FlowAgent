@@ -1,4 +1,4 @@
-FlowAgent - AI Workflow Automation with n8n
+FlowAgent  AI Workflow Automation with n8n
 Task
 
 FlowAgent is an AI-powered automation workflow built using n8n. The objective of this project is to design a simplified and modular system inspired by OpenClow, capable of handling multi-source inputs, processing different media types, and executing intelligent actions through a central AI agent.
