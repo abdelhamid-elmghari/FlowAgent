@@ -231,6 +231,6 @@ This project is released under the [MIT License](LICENSE).
 
 <div align="center">
 
-Built with ❤️ using **n8n** — the visual workflow automation platform.
+Built with ELMGHARI ABDELHAMID using **n8n** — the visual workflow automation platform.
 
 </div>
